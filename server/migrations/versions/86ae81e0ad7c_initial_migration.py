@@ -1,8 +1,8 @@
 """initial migration
 
-Revision ID: 5ff0cde9d282
+Revision ID: 86ae81e0ad7c
 Revises: 
-Create Date: 2024-04-06 21:46:04.136194
+Create Date: 2024-04-09 03:55:37.767172
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5ff0cde9d282'
+revision = '86ae81e0ad7c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,6 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('ingredients', sa.String(), nullable=True),
+    sa.Column('price', sa.Float(), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
@@ -40,8 +41,8 @@ def upgrade():
     sa.Column('pizza_id', sa.Integer(), nullable=False),
     sa.Column('price', sa.Float(), nullable=False),
     sa.CheckConstraint('price >= 1 AND price <= 30', name='check_price_range'),
-    sa.ForeignKeyConstraint(['pizza_id'], ['pizzas.id'], name=op.f('fk_RestaurantPizza_pizza_id_pizzas')),
-    sa.ForeignKeyConstraint(['restaurant_id'], ['restaurants.id'], name=op.f('fk_RestaurantPizza_restaurant_id_restaurants')),
+    sa.ForeignKeyConstraint(['pizza_id'], ['pizzas.id'], ),
+    sa.ForeignKeyConstraint(['restaurant_id'], ['restaurants.id'], ),
     sa.PrimaryKeyConstraint('restaurant_id', 'pizza_id')
     )
     # ### end Alembic commands ###

@@ -1,23 +1,39 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import CheckConstraint, MetaData
-from sqlalchemy.orm import validates
+from sqlalchemy import CheckConstraint, MetaData, UniqueConstraint
 from sqlalchemy_serializer import SerializerMixin
 
 metadata = MetaData(naming_convention={
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
 })
 
-db = SQLAlchemy(metadata=metadata)
+db = SQLAlchemy()
 
-# Association table to store many-to-many relationship between pizzas and restaurants
-pizza_res = db.Table(
-    'RestaurantPizza',
-    metadata,
-    db.Column('restaurant_id', db.Integer, db.ForeignKey('restaurants.id'), primary_key=True),
-    db.Column('pizza_id', db.Integer, db.ForeignKey('pizzas.id'), primary_key=True),
-    db.Column('price', db.Float, nullable=False),
+# Association model to store many-to-many relationship between pizzas and restaurants
+class RestaurantPizza(db.Model, SerializerMixin):
+
+    __tablename__ = 'restaurant_pizzas'
+
+    id = db.Column(db.Integer, primary_key=True)
+    price = db.Column(db.Float)
     CheckConstraint('price >= 1 AND price <= 30', name='check_price_range')  # Add price validation
-)
+
+    # foreign key to store the restaurant_id
+    restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.id'))
+
+    # foreign key to store the pizza_id
+    pizza_id = db.Column(db.Integer, db.ForeignKey('pizzas.id'))
+
+    # relationship mapping a pizza to a restaurant
+    pizza = db.Relationship('Pizza', back_populates='restaurant_pizzas')
+
+    # relationship mapping a restaurant to a pizza
+    restaurant = db.Relationship('Restaurant', back_populates='restaurant_pizzas')
+
+    serialize_rules = ('-restaurant.restaurant_pizzas', '-pizza.restaurant_pizzas')
+
+
+    def __repr__(self):
+        return f'<Restaurant {self.restaurant.name} selling {self.pizza.name} for ${self.price}>'
 
 class Restaurant(db.Model, SerializerMixin):
     __tablename__ = 'restaurants'
@@ -28,14 +44,11 @@ class Restaurant(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-    # Relationship mapping the pizzas to related restaurants
-    pizzas = db.relationship('Pizza', secondary=pizza_res, back_populates='restaurants')
+    # relationship mapping restaurants to related restaurant_pizzas
+    restaurant_pizzas = db.relationship('RestaurantPizza', back_populates='restaurant')
 
-    # @validates('name')
-    # def validate_name(self, name):
-    #     if len(name) > 50:
-    #         raise ValueError("Restaurant name must be less than or equal to 50 characters.")
-    #     return name
+    serialize_rules = ('-restaurant_pizzas.restaurant',)
+
 
     def __repr__(self):
         return f'<Restaurant {self.name}>'
@@ -50,8 +63,13 @@ class Pizza(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, onupdate=db.func.now())
 
-    # Relationship mapping the restaurants to related pizzas
-    restaurants = db.relationship('Restaurant', secondary=pizza_res, back_populates='pizzas')
+    # relationship mapping restaurants to related restaurant_pizzas
+    restaurant_pizzas = db.relationship('RestaurantPizza', back_populates='pizza')
+
+    serialize_rules = ('-restaurant_pizzas.pizza',)
+
 
     def __repr__(self):
         return f'<Pizza {self.name}>'
+
+
