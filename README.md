@@ -1,4 +1,4 @@
-# PIZZA RESTAURANTS - PHASE 4 CODE CHALLENGE
+# PIZZA RESTAURANTS - PHASE 4 WEEK 1 CODE CHALLENGE
 
 - In this code challenge, I was tasked with building a Flask API for a restaurant domain.
 
