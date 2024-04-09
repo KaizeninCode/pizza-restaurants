@@ -22,4 +22,5 @@ These were the required routes/endpoints:
 - DELETE/restaurants/:id
 - GET/pizzas
 - POST/restaurant_pizzas
+  
 I added an additional endpoint (GET/pizza_restaurants) because I felt it was logical to be able to see whatever information is stored at that endpoint.
