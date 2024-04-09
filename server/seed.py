@@ -28,5 +28,5 @@ with app.app_context():
     rp4 = RestaurantPizza(price=9.95, pizza=cheese, restaurant=pizza_hut)
 
     # Add objects to session and commit
-    db.session.add_all([dominion_pizza, pizza_hut, cheese, pepperoni, rp1, rp2, rp3, rp4])
+    db.session.add_all([dominion_pizza, pizza_hut, bigknife, spur, cheese, pepperoni, rp1, rp2, rp3, rp4])
     db.session.commit()
